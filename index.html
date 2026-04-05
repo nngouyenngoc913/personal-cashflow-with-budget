@@ -3,217 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Project Cash Flow & Excel Export</title>
+    <title>Daily Project Cashflow & Receipt Tracker</title>
     <style>
         :root {
             --primary: #2563eb;
             --success: #10b981;
             --danger: #ef4444;
             --dark: #0f172a;
-            --bg: #f8fafc;
+            --bg: #f1f5f9;
             --card: #ffffff;
-            --border: #e2e8f0;
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
-        .container { max-width: 1100px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
 
-        /* Top Bar */
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-excel { background: #16a34a; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .btn-excel:hover { background: #15803d; }
+        /* Left Side: Daily Log & Table */
+        .main-panel { display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { background: var(--card); border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .card-header { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Form Styling */
+        .entry-form { display: grid; grid-template-columns: 1fr 1fr 1fr 100px 50px; gap: 10px; padding: 20px; background: #fff; border-radius: 12px; margin-bottom: 20px; align-items: end; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
 
-        /* Valuation Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .stat-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 8px; }
-        .stat-input { border: none; border-bottom: 2px solid var(--primary); width: 100%; font-size: 20px; font-weight: 700; outline: none; }
+        /* Receipt Upload UI */
+        .pic-upload { background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 6px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+        .pic-upload:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* Table Area */
-        .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 25px; }
+        /* Table */
         table { width: 100%; border-collapse: collapse; }
-        th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 11px; color: #475569; }
-        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 11px; color: #64748b; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .receipt-preview { width: 30px; height: 30px; background: #eee; border-radius: 4px; object-fit: cover; }
 
-        .row-cat { background: #f8fafc; font-weight: bold; display: flex; justify-content: space-between; align-items: center; padding-right: 15px; }
-        .btn-add { background: var(--primary); color: white; border: none; width: 24px; height: 24px; border-radius: 6px; cursor: pointer; font-size: 18px; line-height: 1; }
+        /* Right Side: Weekly Report & Valuation */
+        .side-panel { display: flex; flex-direction: column; gap: 20px; }
+        .report-card { background: var(--dark); color: white; padding: 20px; border-radius: 12px; }
+        .interest-val { font-size: 28px; font-weight: 800; margin: 10px 0; }
+        
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-excel { background: #16a34a; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; }
 
-        .input-box { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-        .row-net { background: #f1f5f9; font-weight: 800; }
-
-        /* Report Footer */
-        .report-box { background: var(--dark); color: white; padding: 30px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .interest-main { font-size: 32px; font-weight: 800; color: var(--success); }
-        .verdict-tag { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-
-        .tag-win { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .tag-loss { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .tag-inc { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .tag-exp { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-nav">
-        <h1>Project Cashflow Dashboard</h1>
-        <button class="btn-excel" onclick="exportToExcel()">
-            📊 Export to Excel (.csv)
-        </button>
+    
+    <div class="main-panel">
+        <header>
+            <h1 style="margin:0;">Daily Project Tracker</h1>
+            <p style="color: #64748b; margin: 5px 0 20px 0;">Log daily receipts and analyze weekly project interest.</p>
+        </header>
+
+        <div class="card">
+            <div class="card-header"><strong>Add Daily Transaction</strong></div>
+            <div class="entry-form">
+                <div class="input-group">
+                    <label>Description</label>
+                    <input type="text" id="desc" placeholder="e.g. Material purchase">
+                </div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <select id="cat">
+                        <option value="income">Revenue / Income</option>
+                        <option value="expense">Operating Expense</option>
+                        <option value="expense">Fixed Cost</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Amount (VNĐ)</label>
+                    <input type="number" id="amt" placeholder="0">
+                </div>
+                <div class="input-group">
+                    <label>Receipt</label>
+                    <label for="pic-input" class="pic-upload">📷</label>
+                    <input type="file" id="pic-input" hidden accept="image/*" onchange="handlePic(this)">
+                </div>
+                <button class="btn-primary" onclick="addEntry()">Add</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><strong>Recent Transactions</strong></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>PIC</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th style="text-align:right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="log-body">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Initial Capital (I₀)</div>
-            <input type="number" id="capital" class="stat-input" value="10000000" oninput="calculate()">
+    <div class="side-panel">
+        <div class="card" style="padding: 20px;">
+            <label>Project Capital (I₀)</label>
+            <input type="number" id="capital" class="stat-input" value="10000000" style="width:100%; border:none; border-bottom:2px solid var(--primary); font-size:20px; font-weight:bold; outline:none;" oninput="calculateReport()">
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Discount Rate</div>
-            <div style="font-size: 20px; font-weight: 700;">8% <span style="font-size: 12px; color: #94a3b8;">/ annum</span></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Investment Baseline</div>
-            <div style="font-size: 20px; font-weight: 700;">20% <span style="font-size: 12px; color: #94a3b8;">Opportunity</span></div>
-        </div>
-    </div>
 
-    <div class="card">
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th style="width: 40%;">Category</th>
-                    <th>Month 1</th>
-                    <th>Month 2</th>
-                    <th>Month 3</th>
-                </tr>
-            </thead>
-            <tbody id="income-body">
-                <tr class="row-cat">
-                    <td colspan="4">
-                        REVENUE 
-                        <button class="btn-add" onclick="addRow('income-body', 'income')">+</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><input type="text" class="input-box" value="Primary Sales"></td>
-                    <td><input type="number" class="input-box inc-m1" value="500000" oninput="calculate()"></td>
-                    <td><input type="number" class="input-box inc-m2" value="400000" oninput="calculate()"></td>
-                    <td><input type="number" class="input-box inc-m3" value="400000" oninput="calculate()"></td>
-                </tr>
-            </tbody>
-            <tbody id="expense-body">
-                <tr class="row-cat">
-                    <td colspan="4">
-                        EXPENSES 
-                        <button class="btn-add" onclick="addRow('expense-body', 'expense')">+</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><input type="text" class="input-box" value="Operating Costs"></td>
-                    <td><input type="number" class="input-box exp-m1" value="100000" oninput="calculate()"></td>
-                    <td><input type="number" class="input-box exp-m2" value="100000" oninput="calculate()"></td>
-                    <td><input type="number" class="input-box exp-m3" value="100000" oninput="calculate()"></td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr class="row-net">
-                    <td>Net Monthly Cash Flow</td>
-                    <td id="net-m1">0 ₫</td>
-                    <td id="net-m2">0 ₫</td>
-                    <td id="net-m3">0 ₫</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-
-    <div class="report-box">
-        <div>
-            <div id="verdict-tag" class="verdict-tag tag-win">Profitable</div>
-            <div style="margin-top: 10px; color: #94a3b8; font-size: 14px;">Final Project Interest</div>
-            <div id="final-interest" class="interest-main">0 ₫</div>
+        <div class="report-card">
+            <label style="color: #94a3b8;">Weekly Project Interest</label>
+            <div id="final-interest" class="interest-val">0 ₫</div>
+            <p id="verdict" style="font-size: 12px; color: #10b981;">● Exceeds 20% Baseline</p>
+            
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+            
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <span>Total Income:</span>
+                <span id="rep-inc">0 ₫</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 8px;">
+                <span>Total Expense:</span>
+                <span id="rep-exp">0 ₫</span>
+            </div>
         </div>
-        <div style="text-align: right; font-size: 13px; color: #94a3b8;">
-            Baseline (I₀/1.2): <span id="baseline-val" style="color: white; font-weight: bold;">0 ₫</span><br>
-            Sum of PV (8%): <span id="pv-sum-val" style="color: white; font-weight: bold;">0 ₫</span>
+
+        <button class="btn-excel" onclick="exportCSV()">📊 Export Weekly Report</button>
+        
+        <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
+            <strong>Formula Note:</strong><br>
+            Calculates PV of daily flows (8% rate) vs Opportunity Cost (Capital/1.2).
         </div>
     </div>
 </div>
 
 <script>
-    function addRow(tbodyId, type) {
-        const tbody = document.getElementById(tbodyId);
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" class="input-box" placeholder="New Category..."></td>
-            <td><input type="number" class="input-box ${type === 'income' ? 'inc-m1' : 'exp-m1'}" value="0" oninput="calculate()"></td>
-            <td><input type="number" class="input-box ${type === 'income' ? 'inc-m2' : 'exp-m2'}" value="0" oninput="calculate()"></td>
-            <td><input type="number" class="input-box ${type === 'income' ? 'inc-m3' : 'exp-m3'}" value="0" oninput="calculate()"></td>
-        `;
-        tbody.appendChild(newRow);
-        calculate();
+    let entries = [];
+    let currentPicBase64 = "";
+
+    function handlePic(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => currentPicBase64 = e.target.result;
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
-    function calculate() {
+    function addEntry() {
+        const desc = document.getElementById('desc').value;
+        const amt = parseFloat(document.getElementById('amt').value) || 0;
+        const type = document.getElementById('cat').selectedOptions[0].text;
+        const isIncome = document.getElementById('cat').value === 'income';
+
+        if(!desc || amt <= 0) return alert("Please enter description and amount");
+
+        const entry = {
+            date: new Date().toLocaleDateString('vi-VN'),
+            desc,
+            amt,
+            isIncome,
+            type,
+            pic: currentPicBase64 || "https://via.placeholder.com/30"
+        };
+
+        entries.unshift(entry);
+        renderTable();
+        calculateReport();
+        
+        // Reset form
+        document.getElementById('desc').value = "";
+        document.getElementById('amt').value = "";
+        currentPicBase64 = "";
+    }
+
+    function renderTable() {
+        const body = document.getElementById('log-body');
+        body.innerHTML = entries.map(e => `
+            <tr>
+                <td>${e.date}</td>
+                <td><img src="${e.pic}" class="receipt-preview"></td>
+                <td>${e.desc}</td>
+                <td><span class="tag ${e.isIncome ? 'tag-inc' : 'tag-exp'}">${e.type}</span></td>
+                <td style="text-align:right; font-weight:bold; color:${e.isIncome ? '#10b981' : '#ef4444'}">
+                    ${e.isIncome ? '+' : '-'}${e.amt.toLocaleString()} ₫
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function calculateReport() {
         const capital = parseFloat(document.getElementById('capital').value) || 0;
-        const r8 = 0.08 / 12; 
+        const r8 = 0.08 / 365; // Daily discount rate
         const r20 = 0.20;
+
+        let totalInc = 0;
+        let totalExp = 0;
         let totalPV = 0;
 
-        for (let m = 1; m <= 3; m++) {
-            let inc = 0;
-            document.querySelectorAll(`.inc-m${m}`).forEach(i => inc += parseFloat(i.value) || 0);
-            let exp = 0;
-            document.querySelectorAll(`.exp-m${m}`).forEach(e => exp += parseFloat(e.value) || 0);
+        entries.forEach((e, index) => {
+            if(e.isIncome) totalInc += e.amt;
+            else totalExp += e.amt;
 
-            const net = inc - exp;
-            const pv = net / Math.pow((1 + r8), m);
-            totalPV += pv;
-
-            document.getElementById(`net-m${m}`).innerText = net.toLocaleString() + " ₫";
-        }
-
-        const baseline = capital / (1 + r20);
-        const interest = -capital + totalPV - baseline;
-
-        document.getElementById('baseline-val').innerText = Math.round(baseline).toLocaleString() + " ₫";
-        document.getElementById('pv-sum-val').innerText = Math.round(totalPV).toLocaleString() + " ₫";
-        
-        const finalEl = document.getElementById('final-interest');
-        finalEl.innerText = Math.round(interest).toLocaleString() + " ₫";
-        
-        const tag = document.getElementById('verdict-tag');
-        if (interest >= 0) {
-            finalEl.style.color = "#10b981";
-            tag.innerText = "Profitable (Beats 20%)";
-            tag.className = "verdict-tag tag-win";
-        } else {
-            finalEl.style.color = "#ef4444";
-            tag.innerText = "Below Target (Below 20%)";
-            tag.className = "verdict-tag tag-loss";
-        }
-    }
-
-    function exportToExcel() {
-        let csv = "Category,Month 1,Month 2,Month 3\n";
-        const rows = document.querySelectorAll("#mainTable tr");
-        
-        rows.forEach(row => {
-            const inputs = row.querySelectorAll("input");
-            if (inputs.length > 0) {
-                const rowData = Array.from(inputs).map(i => i.value);
-                csv += rowData.join(",") + "\n";
-            }
+            // Discount logic (Simplified daily)
+            const net = e.isIncome ? e.amt : -e.amt;
+            totalPV += net / Math.pow((1 + r8), 7); // Using weekly horizon for this report
         });
 
-        csv += `\nINITIAL CAPITAL,${document.getElementById('capital').value}\n`;
-        csv += `FINAL INTEREST,${document.getElementById('final-interest').innerText.replace(/[^0-9-]/g, '')}\n`;
+        const baseline = capital / (1 + r20);
+        const projectInterest = -capital + totalPV - baseline;
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", "Project_Cashflow.csv");
-        link.click();
+        document.getElementById('rep-inc').innerText = totalInc.toLocaleString() + " ₫";
+        document.getElementById('rep-exp').innerText = totalExp.toLocaleString() + " ₫";
+        
+        const finalEl = document.getElementById('final-interest');
+        finalEl.innerText = Math.round(projectInterest).toLocaleString() + " ₫";
+        finalEl.style.color = projectInterest >= 0 ? '#34d399' : '#f87171';
+        
+        const verdict = document.getElementById('verdict');
+        if(projectInterest >= 0) {
+            verdict.innerText = "● Exceeds 20% Baseline";
+            verdict.style.color = "#34d399";
+        } else {
+            verdict.innerText = "● Below 20% Target";
+            verdict.style.color = "#f87171";
+        }
     }
 
-    window.onload = calculate;
+    function exportCSV() {
+        let csv = "Date,Description,Type,Amount\n";
+        entries.forEach(e => {
+            csv += `${e.date},${e.desc},${e.type},${e.isIncome ? '' : '-'}${e.amt}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Weekly_Project_Report.csv";
+        link.click();
+    }
 </script>
 
 </body>
